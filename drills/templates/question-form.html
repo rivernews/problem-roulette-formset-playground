@@ -1,0 +1,124 @@
+<html>
+
+<head>
+
+    <style>
+        .formWrapper {
+            margin-top: 50px;
+        }
+        div.formWrapper.question > div.fieldWrapper.question_form:nth-last-of-type(-n+3),
+        div.formWrapper.answer > div.fieldWrapper.answer_form:nth-last-of-type(-n+2) {
+            /* display: none; */
+            background-color: red;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div>
+        <span>Go back to <a href="{% url 'index' %}">Home</a></span>
+    </div>
+    <div>
+        <!-- How to render form in html: https://docs.djangoproject.com/en/1.11/topics/forms/ -->
+        <form method="post" action="">{% csrf_token %} 
+            <div class="formset-wrapper question">
+            {{ question_formset.management_form }}
+            {{ question_formset.non_form_errors }}
+            {% for question_form in question_formset %}
+                <div class="formWrapper main-forms question">
+                    <h2>Question</h2>
+                    {% include 'fields-of-form-template.html' with form=question_form form_name='question_form' %}
+
+                    {% if question_form.nested %}
+                        {% with answer_formset=question_form.nested %}
+                            <div class="formset-wrapper answer">
+                                {{answer_formset.management_form}}
+                                {{answer_formset.non_form_errors}}
+                                {% for answer_form in answer_formset %}
+                                    <div class="formWrapper main-forms answer">
+                                        <h3>Answer</h3>
+                                        {% include 'fields-of-form-template.html' with form=answer_form form_name='answer_form' %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endwith %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+            </div>
+            <div class="formWrapper empty-form">
+                {% comment %}
+                {% with empty_form=question_formset.empty_form %}
+                    {% for field in empty_form %}
+                        <div class="fieldWrapper">
+                            {{ field.errors }}
+                            {{ field.label_tag }} {{ field }}
+                            {% if field.help_text %}
+                            <p class="help">{{ field.help_text|safe }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endwith %}
+                {% endcomment %}
+            </div>
+            <button class="create-button" >Create</button>
+            <button>Submit</button>
+        </form>
+    </div>
+
+    <script
+    src="https://code.jquery.com/jquery-1.12.4.min.js"
+    integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+    crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function(){
+            formsetManaer = new FormsetManager();
+        });
+
+        function FormsetManager() {
+            this.totalForms = $("#id_form-TOTAL_FORMS");
+            this.initialForms = $("#id_form-INITIAL_FORMS");
+            this.minNumForms = $("#id_form-MIN_NUM_FORMS");
+            this.maxNumForms = $("#id_form-MAX_NUM_FORMS");
+            console.log(
+                'total form is ' + this.totalForms.val(),
+                'initial form is ' + this.initialForms.val(),
+                'min num form is ' + this.minNumForms.val(),
+                'max num form is ' + this.maxNumForms.val(),
+            );
+
+            this.mainForms = $(".main-forms").toArray();
+
+            this.emptyForm = $(".empty-form").hide();
+
+            this.createButton = $(".create-button").on('click', this.createNewForm.bind(this));
+        }
+
+        FormsetManager.prototype.createNewForm = function(event) {
+            event.preventDefault();
+
+            var newForm = this.emptyForm.clone(); // https://api.jquery.com/clone/
+            newForm.appendTo('.formset-wrapper').show(); // https://api.jquery.com/appendTo/#appendTo-target
+
+            this.mainForms.push(newForm);
+            this.totalForms = this.mainForms.length;
+        }
+
+        // management variables
+        // have control over
+
+        // for each form
+        // delete <control hide/show>
+        // order <control ...>
+
+        // for each field
+            
+        // empty form:
+        // have an initial empty form
+        // generate new form, tweak management form variables
+    </script>
+</body>
+
+</html>

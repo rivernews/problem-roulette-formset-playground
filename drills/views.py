@@ -12,22 +12,36 @@ class IndexView(TemplateView):
 
 index_view = IndexView.as_view()
 
-class AnswerFormView(TemplateView):
-    template_name = 'answer-form.html'
+class QuestionFormView(TemplateView):
+    template_name = 'question-form.html'
 
     def get_context_data(self, **kwargs):
-        context = super(AnswerFormView, self).get_context_data(**kwargs)
-        context['formset'] = forms.AnswerFormSet(
-            initial=[
-                {
-                    'description': 'This is a default answer',
-                    'correct': True
-                }
-            ]
+        context = super(QuestionFormView, self).get_context_data(**kwargs)
+        
+        # data = {
+        #     'form-TOTAL_FORMS': '',
+        #     'form-INITIAL_FORMS': '',
+        #     'form-MAX_NUM_FORMS': '',
+        # }
+        context['question_formset'] = forms.QuestionFormSet(
+            # instance=forms.QuestionForm
+            # data,
+            # initial=[
+            #     {
+            #         'description': 'This is a default question description',
+            #         'title': 'Question 1'
+            #     }
+            # ]
         )
         return context
 
     def get(self, request, **kwargs):
         return render(request, self.template_name, self.get_context_data(**kwargs))
+    
+    def post(self, request, **kwargs):
+        print('\n===== Posted! =====')
+        print(kwargs)
+        print('\n')
+        return render(request, self.template_name, self.get_context_data(**kwargs))        
 
-answer_form_view = AnswerFormView.as_view()
+question_form_view = QuestionFormView.as_view()
